@@ -52,7 +52,10 @@ namespace RevitPythonShell
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Error setting up RevitPythonShell", ex.ToString());
+                var td = new TaskDialog("Error setting up RevitPythonShell");
+                td.MainInstruction = ex.Message;
+                td.ExpandedContent = ex.ToString();
+                td.Show();
                 return Result.Failed;
             }
         }
@@ -60,7 +63,9 @@ namespace RevitPythonShell
         private static void ExecuteStartupScript(UIControlledApplication uiControlledApplication)
         {
             // we need a UIApplication object to assign as `__revit__` in python...
-            var fi = uiControlledApplication.GetType().GetField("m_application", BindingFlags.NonPublic | BindingFlags.Instance);
+            var versionNumber = uiControlledApplication.ControlledApplication.VersionNumber;
+            var fieldName = int.Parse(versionNumber) >= 2017 ? "m_uiapplication": "m_application";
+            var fi = uiControlledApplication.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             var uiApplication = (UIApplication)fi.GetValue(uiControlledApplication);            
             // execute StartupScript
             var startupScript = GetStartupScript();
@@ -78,38 +83,41 @@ namespace RevitPythonShell
         private static void BuildRibbonPanel(UIControlledApplication application, string dllfullpath)
         {
             var assembly = typeof(RevitPythonShellApplication).Assembly;
-            var largeImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.PythonConsole32x32.png");
-            var smallImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.PythonConsole16x16.png");
+            var smallImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Python-16.png");
+            var largeImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Python-32.png");
+            
 
             RibbonPanel ribbonPanel = application.CreateRibbonPanel("RevitPythonShell");
             var splitButton = ribbonPanel.AddItem(new SplitButtonData("splitButtonRevitPythonShell", "RevitPythonShell")) as SplitButton;
 
             PushButtonData pbdOpenPythonShell = new PushButtonData(
                             "RevitPythonShell", 
-                            "Interactive Python Shell", 
+                            "Interactive\nPython Shell", 
                             assembly.Location, 
                             "RevitPythonShell.IronPythonConsoleCommand");
             pbdOpenPythonShell.Image = smallImage;
             pbdOpenPythonShell.LargeImage = largeImage;
+            pbdOpenPythonShell.AvailabilityClassName = "RevitPythonShell.IronPythonConsoleCommandAvail";
             splitButton.AddPushButton(pbdOpenPythonShell);
 
             PushButtonData pbdOpenNonModalShell = new PushButtonData(
                             "NonModalRevitPythonShell",
-                            "Non-modal Shell",
+                            "Non-modal\nShell",
                             assembly.Location,
                             "RevitPythonShell.NonModalConsoleCommand");
             pbdOpenNonModalShell.Image = smallImage;
             pbdOpenNonModalShell.LargeImage = largeImage;
+            pbdOpenNonModalShell.AvailabilityClassName = "RevitPythonShell.IronPythonConsoleCommandAvail";
             splitButton.AddPushButton(pbdOpenNonModalShell);
-
 
             PushButtonData pbdConfigure = new PushButtonData(
                             "Configure", 
                             "Configure...", 
                             assembly.Location, 
                             "RevitPythonShell.ConfigureCommand");
-            pbdConfigure.Image = smallImage;
-            pbdConfigure.LargeImage = largeImage;
+            pbdConfigure.Image = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Settings-16.png");
+            pbdConfigure.LargeImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Settings-32.png");
+            pbdConfigure.AvailabilityClassName = "RevitPythonShell.IronPythonConsoleCommandAvail";
             splitButton.AddPushButton(pbdConfigure);
 
             PushButtonData pbdDeployRpsAddin = new PushButtonData(
@@ -117,8 +125,9 @@ namespace RevitPythonShell
                 "Deploy RpsAddin",
                 assembly.Location,
                 "RevitPythonShell.DeployRpsAddinCommand");
-            pbdDeployRpsAddin.Image = smallImage;
-            pbdDeployRpsAddin.LargeImage = largeImage;
+            pbdDeployRpsAddin.Image = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Deployment-16.png");
+            pbdDeployRpsAddin.LargeImage = GetEmbeddedPng(assembly, "RevitPythonShell.Resources.Deployment-32.png");
+            pbdDeployRpsAddin.AvailabilityClassName = "RevitPythonShell.IronPythonConsoleCommandAvail";
             splitButton.AddPushButton(pbdDeployRpsAddin);
 
             var commands = GetCommands(GetSettings()).ToList();
@@ -497,6 +506,7 @@ namespace RevitPythonShell
             string startupScript)
         {
             var doc = GetSettings();
+            var settingsFolder = GetSettingsFolder();
 
             // clean out current stuff
             foreach (var xmlExistingCommands in (doc.Root.Descendants("Commands") ?? new List<XElement>()).ToList())
@@ -540,6 +550,13 @@ namespace RevitPythonShell
                 xmlSearchPaths.Add(new XElement(
                     "SearchPath",
                         new XAttribute("name", path)));
+
+            }
+            // ensure settings directory is added to the search paths
+            if (!searchPaths.Contains(settingsFolder)) {
+                xmlSearchPaths.Add(new XElement(
+                    "SearchPath",
+                        new XAttribute("name", settingsFolder)));
 
             }
             doc.Root.Add(xmlSearchPaths);

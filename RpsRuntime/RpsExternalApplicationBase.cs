@@ -172,7 +172,9 @@ namespace RevitPythonShell.RpsRuntime
         private void ExecuteStartupScript(UIControlledApplication uiControlledApplication, XDocument addinXml, Assembly addinAssembly)
         {
             // we need a UIApplication object to assign as `__revit__` in python...
-            var fi = uiControlledApplication.GetType().GetField("m_application", BindingFlags.NonPublic | BindingFlags.Instance);
+            var versionNumber = uiControlledApplication.ControlledApplication.VersionNumber;
+            var fieldName = int.Parse(versionNumber) >= 2017 ? "m_uiapplication" : "m_application";
+            var fi = uiControlledApplication.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             var uiApplication = (UIApplication)fi.GetValue(uiControlledApplication);
             // execute StartupScript
             var scriptName = GetStartupScriptName(addinXml);
@@ -196,6 +198,10 @@ namespace RevitPythonShell.RpsRuntime
         /// </summary>
         private string GetEmbeddedScript(string scriptName, Assembly addinAssembly)
         {         
+            if (scriptName == null)
+            {
+                return null;
+            }
             var source = new StreamReader(addinAssembly.GetManifestResourceStream(scriptName)).ReadToEnd();
             return source;
         }

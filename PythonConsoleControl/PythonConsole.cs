@@ -24,6 +24,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Utils;
 using Style = Microsoft.Scripting.Hosting.Shell.Style;
+using System.Runtime.Remoting;
 
 namespace PythonConsoleControl
 {
@@ -53,7 +54,7 @@ namespace PythonConsoleControl
             }
         }
 
-        bool allowCtrlSpaceAutocompletion = false;
+        bool allowCtrlSpaceAutocompletion = true;
         public bool AllowCtrlSpaceAutocompletion
         {
             get { return allowCtrlSpaceAutocompletion; }
@@ -307,12 +308,12 @@ namespace PythonConsoleControl
                     }
                     else if (rectangular && textArea.Selection.IsEmpty)
                     {
-                        if (!RectangleSelection.PerformRectangularPaste(textArea, textArea.Caret.Offset, text, false))
-                            textEditor.Write(text, false);
+                        if (!RectangleSelection.PerformRectangularPaste(textArea, textArea.Caret.Position, text, false))
+                            textEditor.Write(text, false, false);
                     }
                     else
                     {
-                        textEditor.Write(text, false);
+                        textEditor.Write(text, false, false);
                     }
                 }
                 textArea.Caret.BringCaretToView();
@@ -390,7 +391,12 @@ namespace PythonConsoleControl
                     }
                     else
                     {
-                        GetCommandDispatcher()(() => scriptSource.Execute(commandLine.ScriptScope));
+                        ObjectHandle wrapexception = null;
+                        GetCommandDispatcher()(() => scriptSource.ExecuteAndWrap(commandLine.ScriptScope, out wrapexception));
+                        if (wrapexception != null)
+                        {
+                            error = "Exception : " + wrapexception.Unwrap().ToString() + "\n";
+                        }
                     }                    
                 }
                 catch (ThreadAbortException tae)
@@ -565,7 +571,7 @@ namespace PythonConsoleControl
         {
             if (e.Text.Length > 0)
             {
-                if (!char.IsLetterOrDigit(e.Text[0]))
+                if (!char.IsLetterOrDigit(e.Text[0]) || e.Text[0] == '_') // Underscore is a fairly common character in Revit API names.
                 {
                     // Whenever a non-letter is typed while the completion window is open,
                     // insert the currently selected element.

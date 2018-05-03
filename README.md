@@ -22,8 +22,10 @@ writing your Revit Addins - use this in combination with the [RevitLookup](https
 
 ## Installation
 
-- [Installer for Autodesk Revit 2016](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2015.04.29/2015.04.29_Setup_RevitPythonShell_2016.exe)
-- [Installer for Autodesk Revit 2015](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2015.04.29/2015.04.29_Setup_RevitPythonShell_2015.exe)
+- [Installer for Autodesk Revit 2018 (and 2018.1)](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2017.07.24/2017.07.24_Setup_RevitPythonShell_2018.exe)
+- [Installer for Autodesk Revit 2017](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2017.04.06/2017.04.06_Setup_RevitPythonShell_2017.exe)
+- [Installer for Autodesk Revit 2016](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2017.03.07/2017.03.07_Setup_RevitPythonShell_2016.exe)
+- [Installer for Autodesk Revit 2015](https://github.com/architecture-building-systems/revitpythonshell/releases/download/2017.03.07/2017.03.07_Setup_RevitPythonShell_2015.exe)
 
 Older versions:
 - [Release 2015.03.20](Revit 2014, 2015 & Vasari Beta 3)](https://github.com/architecture-building-systems/revitpythonshell/releases/tag/2015.03.20)
@@ -54,6 +56,10 @@ Learn about the Revit API:
 
   * [Autodesk Developer Network](T)
   * [Jeremy Tammiks blog "The Building Coder"](http://thebuildingcoder.typepad.com/)
+   
+Tutorials recommended by the community:
+
+  * [Mono IronPython Winforms Tutorial](http://zetcode.com/tutorials/ironpythontutorial/) - recommended by Callum
 
 You can find sample scripts here:
 
@@ -64,6 +70,7 @@ You can find sample scripts here:
   * [dp stuff (Python Scripts Archives)](http://dp-stuff.org/category/python-scripts)
     * lots of scripts
   * [my own blog](http://darenatwork.blogspot.com/) contains the odd sample script
+  * [Check out pyRevit](http://eirannejad.github.io/pyRevit/whatspyrevit/) by Ehsan Iran-Nejad - it includes a library of interesting scripts and some additions to make writing your own easier!
 
 ## License
 
@@ -76,6 +83,7 @@ This project is licensed under the terms of the [MIT License](http://opensource.
   * Akimitsu Hogge (original port to Vasari)
   * Joe Moorhouse (interactive shell was taken from his project [IronLab](http://ironlab.net/))
   * Jason Schaeffer (port to Revit 2011)
+  * [@DanRumery](https://github.com/danrumery) improved autocompletion with PR #59
   * many, many users with questions, bug reports etc!
 
 Also, many thanks to the
